@@ -1,0 +1,22 @@
+version: '3.5'
+services:
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    image: nodejs
+    environment:
+      QUEUE_HOST: queue.host
+    depends_on:
+      - queue
+    ports:
+      - '3000:3000'
+    links:
+      - queue:queue.host
+    volumes:
+      - .:/app
+  queue:
+    image: rabbitmq:management
+    ports:
+      - '15672:15672'
+      - '5672:5672'
