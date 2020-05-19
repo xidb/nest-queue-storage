@@ -1,8 +1,8 @@
-import { RabbitMQModule } from '@golevelup/nestjs-rabbitmq';
 import { Module } from '@nestjs/common';
+import { QueueModule } from './queue/queue.module';
 import { StorageModule } from './storage/storage.module';
 
 @Module({
-  imports: [StorageModule],
+  imports: [QueueModule, StorageModule],
 })
 export class AppModule {}

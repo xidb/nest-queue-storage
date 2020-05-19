@@ -6,9 +6,8 @@ export class StorageRequestDto {
   @IsEnum(RequestType)
   readonly type: RequestType;
 
-  @IsOptional()
   @IsString()
-  readonly key?: string;
+  readonly key: string;
 
   @IsOptional()
   @IsStringOrObject('value', { message: 'value could be a string or object' })

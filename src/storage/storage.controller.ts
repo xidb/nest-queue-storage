@@ -1,13 +1,16 @@
 import { Controller, Body, Post } from '@nestjs/common';
+import { QueueService } from '../queue/queue.service';
 import { StorageRequestDto } from './dto/storage-request.dto';
 import { StorageService } from './storage.service';
 
 @Controller('storage')
 export class StorageController {
-  constructor(private readonly storageService: StorageService) {}
+  constructor(private readonly queueService: QueueService) {}
 
   @Post()
-  async process(@Body() message: StorageRequestDto): Promise<void> {
-    return this.storageService.process(message);
+  async processStorageRequest(
+    @Body() request: StorageRequestDto,
+  ): Promise<void> {
+    return this.queueService.addMessage(StorageService.incomingQueue, request);
   }
 }

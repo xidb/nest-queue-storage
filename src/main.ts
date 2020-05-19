@@ -11,6 +11,7 @@ async function bootstrap(): Promise<void> {
       forbidNonWhitelisted: true,
     }),
   );
+
   await app.listen(3000);
 }
 bootstrap();

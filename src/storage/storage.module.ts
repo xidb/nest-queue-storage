@@ -1,14 +1,10 @@
 import { Module } from '@nestjs/common';
-import { RabbitMQModule } from '@golevelup/nestjs-rabbitmq';
 import { StorageController } from './storage.controller';
 import { StorageService } from './storage.service';
+import { QueueModule } from '../queue/queue.module';
 
 @Module({
-  imports: [
-    RabbitMQModule.forRoot(RabbitMQModule, {
-      uri: `amqp://guest:guest@${process.env.QUEUE_HOST || 'localhost'}:5672`,
-    }),
-  ],
+  imports: [QueueModule],
   controllers: [StorageController],
   providers: [StorageService],
 })
