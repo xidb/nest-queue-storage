@@ -14,6 +14,7 @@ export class StorageService {
     this.storage = JSON.parse(
       fs.readFileSync(StorageService.snapshotPath, 'utf8'),
     );
+    this.replayLog();
   }
 
   private readonly logger = new Logger(StorageService.name);
@@ -54,6 +55,14 @@ export class StorageService {
     return this.logger.debug(`Snapshot saved (~${size}K)`);
   }
 
+  private replayLog(): void {
+    const log = fs.readFileSync(StorageService.logPath, 'utf8');
+    const requests = log.split('\n');
+    requests
+      .filter(r => Boolean(r))
+      .map(r => this.mutateStorage(JSON.parse(r)));
+  }
+
   public get(key: IStorageResponse['key']): IStorageResponse {
     return this.storage[key];
   }
@@ -82,6 +91,20 @@ export class StorageService {
   }
 
   public async handleRequest(request: IStorageRequest): Promise<void> {
+    const response = this.mutateStorage(request);
+
+    fs.appendFile(
+      StorageService.logPath,
+      JSON.stringify(request) + '\n',
+      () => {
+        return;
+      },
+    );
+
+    return this.queueService.addMessage(StorageService.outgoingQueue, response);
+  }
+
+  private mutateStorage(request: IStorageRequest): IStorageResponse {
     const response: IStorageResponse = Object.assign(
       { value: {} },
       JSON.parse(JSON.stringify(request)),
@@ -101,14 +124,6 @@ export class StorageService {
         break;
     }
 
-    fs.appendFile(
-      StorageService.logPath,
-      JSON.stringify(request) + '\n',
-      () => {
-        return;
-      },
-    );
-
-    await this.queueService.addMessage(StorageService.outgoingQueue, response);
+    return response;
   }
 }
