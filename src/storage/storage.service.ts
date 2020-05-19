@@ -11,6 +11,9 @@ import { IStorageResponse } from './interfaces/storage-response.interface';
 @Injectable()
 export class StorageService {
   constructor(private readonly queueService: QueueService) {
+    if (!fs.existsSync(StorageService.dirPath)) {
+      fs.mkdirSync(StorageService.dirPath);
+    }
     this.loadSnapshot();
     this.replayLog();
   }
@@ -19,18 +22,12 @@ export class StorageService {
 
   private storage = {};
   private static readonly snapshotInterval = CronExpression.EVERY_MINUTE;
+  private static readonly dirPath = path.join(__dirname, '../..', 'storage');
   private static readonly snapshotPath = path.join(
-    __dirname,
-    '../..',
-    'storage',
+    StorageService.dirPath,
     'snapshot',
   );
-  private static readonly logPath = path.join(
-    __dirname,
-    '../..',
-    'storage',
-    'log',
-  );
+  private static readonly logPath = path.join(StorageService.dirPath, 'log');
 
   public static readonly incomingQueue = 'INCOME_QUEUE';
   public static readonly outgoingQueue = 'OUTCOME_QUEUE';
