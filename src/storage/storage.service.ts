@@ -11,9 +11,7 @@ import { IStorageResponse } from './interfaces/storage-response.interface';
 @Injectable()
 export class StorageService {
   constructor(private readonly queueService: QueueService) {
-    this.storage = JSON.parse(
-      fs.readFileSync(StorageService.snapshotPath, 'utf8'),
-    );
+    this.loadSnapshot();
     this.replayLog();
   }
 
@@ -55,7 +53,21 @@ export class StorageService {
     return this.logger.debug(`Snapshot saved (~${size}K)`);
   }
 
+  private loadSnapshot(): void {
+    if (!fs.existsSync(StorageService.snapshotPath)) {
+      return;
+    }
+
+    this.storage = JSON.parse(
+      fs.readFileSync(StorageService.snapshotPath, 'utf8'),
+    );
+  }
+
   private replayLog(): void {
+    if (!fs.existsSync(StorageService.logPath)) {
+      return;
+    }
+
     const log = fs.readFileSync(StorageService.logPath, 'utf8');
     const requests = log.split('\n');
     requests
