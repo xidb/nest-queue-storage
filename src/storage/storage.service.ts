@@ -99,6 +99,19 @@ export class StorageService {
     return this.handleRequest(request);
   }
 
+  @RabbitSubscribe({
+    exchange: 'amq.direct',
+    routingKey: 'config',
+    queue: StorageService.outgoingQueue,
+  })
+  public async debugOutgoingResponse(
+    response: IStorageResponse,
+  ): Promise<void> {
+    return this.logger.debug(
+      `${StorageService.outgoingQueue}: ${JSON.stringify(response)}`,
+    );
+  }
+
   public async handleRequest(request: IStorageRequest): Promise<void> {
     const response = this.mutateStorage(request);
 
